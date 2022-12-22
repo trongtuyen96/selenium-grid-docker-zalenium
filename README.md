@@ -23,10 +23,16 @@ Grid aims to:
   - Allow testing on different browser versions
   - Enable cross-platform testing
 
+In scope of this test, I only use Selenium Grid 4.
+
 ## Selenium Grid with Docker
 Docker is an open-source containerization platform that makes it easy to create, deploy, and run applications in a secure manner using containers. Docker provides virtualization at the Operating System (OS) level. All the software parts in Docker are organized in Containers.
 
 When it comes to Selenium automation testing, it is important that a test run in one execution environment does not hinder the execution of tests run in another test environment (s). Hence, automation tests should be run in isolation, and Docker helps in realizing this ‘essential’ requirement.
+- Scalable and Reliable
+- Less overhead of installations
+- Improved Security
+- Lesser chances of discrepancies
 
 ## Zalenium
 
@@ -48,7 +54,8 @@ Standalone combines all Grid components seamlessly into one. Running a Grid in S
   ChromeOptions chromeOptions = new ChromeOptions();
   driver = new RemoteWebDriver(new URL("http://localhost:4444"), chromeOptions);
   ````
-- Run your test 
+- Run your test
+  - Example: /test/java/SeleniumGridTest.java
 
 ## Hub and Node mode
 Hub and Node is the most used role because it allows to:
@@ -107,6 +114,7 @@ So 6 of components below need to be started:
 4. Distributor
 5. Router
 6. Nodes
+
 The detailed instructions will be added later.
 
 ## Grid size suggestions
@@ -115,8 +123,66 @@ The detailed instructions will be added later.
 - Large: Hub/Node between 60 and 100 Nodes. Distributed with over 100 Nodes.
 
 # Set up Selenium Grid with standalone Docker image
+There are 3 docker images for Chrome, Firefox and Edge used in this example.
+They will use port 4444 by default for server and 7900 for NoVNC, so to use all 3 without error in allocated ports, mapping new ports need to be done.
 
+## Start Docker containers
 
+### Start Chrome standalone with port 4445
+````bash
+docker run -d -p 4445:4444 -p 7901:7900 --shm-size="2g" selenium/standalone-chrome:4.7.2-20221219
+````
+- Container exposed on port http://localhost:4445
+- NoVNC (allow users inspect visually container activity with their browser) exposed on port 7901
+- For an image that contains a browser please use the flag --shm-size=2g to use the host's shared memory
+- In order to prevent pushing up to existing tags and breaking existing functionality, should use tagging convention
+  ````bash
+  selenium/standalone-browserName-<Major>.<Minor>.<Patch>-<YYYYMMDD>
+  ````
+- No need to pull image in advance as Docker will pull that image if it was not existed locally
+
+### Start Firefox standalone with port 4446
+````bash
+docker run -d -p 4446:4444 -p 7902:7900 --shm-size="2g" selenium/standalone-firefox:4.7.2-20221219
+````
+- Container exposed on port http://localhost:4446
+- NoVNC exposed on port 7902
+
+### Start Edge standalone with port 4447
+````bash
+docker run -d -p 4447:4444 -p 7903:7900 --shm-size="2g" selenium/standalone-edge:4.7.2-20221219
+````
+- Container exposed on port http://localhost:4447
+- NoVNC exposed on port 7903
+
+## Point your test to exposed ports
+In my test /test/java/DockerStandaloneTest.java
+````bash
+ case "chrome":
+    ChromeOptions chromeOptions = new ChromeOptions();
+    driver = new RemoteWebDriver(new URL("http://localhost:4445"),chromeOptions);
+    break;
+ case "firefox":
+    FirefoxOptions firefoxOptions = new FirefoxOptions();
+    driver = new RemoteWebDriver(new URL("http://localhost:4446"),firefoxOptions);
+    break;
+ case "edge":
+    EdgeOptions edgeOptions = new EdgeOptions();
+    driver = new RemoteWebDriver(new URL("http://localhost:4447"),edgeOptions);
+    break;
+````
+Each url with respective port is set up with corresponding container.
+
+## View test run visually on browser
+New version of standalone container from selenium has provided noVNC to allow user to inspect what is running in browser.
+We do not need to install VNC client to do this anymore.
+
+To see what is happening inside the container, head to:
+- Chrome container: http://localhost:7901/?autoconnect=1&resize=scale&password=secret
+- Firefox container: http://localhost:7902/?autoconnect=1&resize=scale&password=secret
+- Edge container: http://localhost:7903/?autoconnect=1&resize=scale&password=secret
+
+or simply: http://localhost:7901 with password is "secret".
 # Author
 <h4 align="center">
 	Tuyen Nguyen - Senior QA Automation Engineer

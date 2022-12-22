@@ -2,7 +2,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -13,32 +12,25 @@ import org.testng.annotations.Test;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class ATWTPageTest {
+public class DockerStandaloneTest {
     public WebDriver driver;
-    public DesiredCapabilities capabilities = new DesiredCapabilities();
-
     @Parameters({"browser"})
     @BeforeTest
     public void setDriver(String browser) throws MalformedURLException {
         switch(browser){
             case "chrome":
-                capabilities.setBrowserName("chrome");
                 ChromeOptions chromeOptions = new ChromeOptions();
-                chromeOptions.merge(capabilities);
-                break;
-            case "edge":
-                // Track on http://localhost:4444/status to check the name of browser name that currently supported
-                capabilities.setBrowserName("MicrosoftEdge");
-                EdgeOptions edgeOptions = new EdgeOptions();
-                edgeOptions.merge(capabilities);
+                driver = new RemoteWebDriver(new URL("http://localhost:4445"),chromeOptions);
                 break;
             case "firefox":
-                capabilities.setBrowserName("firefox");
                 FirefoxOptions firefoxOptions = new FirefoxOptions();
-                firefoxOptions.merge(capabilities);
+                driver = new RemoteWebDriver(new URL("http://localhost:4446"),firefoxOptions);
+                break;
+            case "edge":
+                EdgeOptions edgeOptions = new EdgeOptions();
+                driver = new RemoteWebDriver(new URL("http://localhost:4447"),edgeOptions);
                 break;
         }
-        driver = new RemoteWebDriver(new URL("http://localhost:4444"),capabilities);
         driver.get("https://www.automatedtestingwithtuyen.com");
     }
 
