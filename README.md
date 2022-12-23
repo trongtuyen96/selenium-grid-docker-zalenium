@@ -6,9 +6,10 @@
 <h3 align="center" style="bold">A series of instruction about setting up selenium grid, docker and zalenium with TestNG framework.</h3>
 
 # Table of Contents
-- [Getting Started](getting-started)
+- [Getting Started](#getting-started)
 - [Set up Selenium Grid](#set-up-selenium-grid)
 - [Set up Selenium Grid with standalone Docker image](#set-up-selenium-grid-with-standalone-docker-image)
+- [Set up Selenium Grid with Docker image using different machines](#set-up-selenium-grid-with-docker-image-using-different-machines)
 - [Set up Selenium Grid with Docker compose](#set-up-selenium-grid-with-docker-compose)
 - [Set up Selenium Grid with Zalenium](#set-up-selenium-grid-with-zalenium)
 - [Author](#author)
@@ -118,20 +119,21 @@ So 6 of components below need to be started:
 The detailed instructions will be added later.
 
 ## Grid size suggestions
-- Small: Standalone or Hub/Node with 5 or less Nodes.
+- Small: Standalone or Hub/Node with 5 or fewer Nodes.
 - Middle: Hub/Node between 6 and 60 Nodes.
 - Large: Hub/Node between 60 and 100 Nodes. Distributed with over 100 Nodes.
 
 # Set up Selenium Grid with standalone Docker image
 There are 3 docker images for Chrome, Firefox and Edge used in this example.
+
 They will use port 4444 by default for server and 7900 for NoVNC, so to use all 3 without error in allocated ports, mapping new ports need to be done.
 
 ## Start Docker containers
 
 ### Start Chrome standalone with port 4445
-````bash
-docker run -d -p 4445:4444 -p 7901:7900 --shm-size="2g" selenium/standalone-chrome:4.7.2-20221219
-````
+  ````bash
+  docker run -d -p 4445:4444 -p 7901:7900 --shm-size="2g" selenium/standalone-chrome:4.7.2-20221219
+  ````
 - Container exposed on port http://localhost:4445
 - NoVNC (allow users inspect visually container activity with their browser) exposed on port 7901
 - For an image that contains a browser please use the flag --shm-size=2g to use the host's shared memory
@@ -142,35 +144,35 @@ docker run -d -p 4445:4444 -p 7901:7900 --shm-size="2g" selenium/standalone-chro
 - No need to pull image in advance as Docker will pull that image if it was not existed locally
 
 ### Start Firefox standalone with port 4446
-````bash
-docker run -d -p 4446:4444 -p 7902:7900 --shm-size="2g" selenium/standalone-firefox:4.7.2-20221219
-````
+  ````bash
+  docker run -d -p 4446:4444 -p 7902:7900 --shm-size="2g" selenium/standalone-firefox:4.7.2-20221219
+  ````
 - Container exposed on port http://localhost:4446
 - NoVNC exposed on port 7902
 
 ### Start Edge standalone with port 4447
-````bash
-docker run -d -p 4447:4444 -p 7903:7900 --shm-size="2g" selenium/standalone-edge:4.7.2-20221219
-````
+  ````bash
+  docker run -d -p 4447:4444 -p 7903:7900 --shm-size="2g" selenium/standalone-edge:4.7.2-20221219
+  ````
 - Container exposed on port http://localhost:4447
 - NoVNC exposed on port 7903
 
 ## Point your test to exposed ports
 In my test /test/java/DockerStandaloneTest.java
-````bash
- case "chrome":
-    ChromeOptions chromeOptions = new ChromeOptions();
-    driver = new RemoteWebDriver(new URL("http://localhost:4445"),chromeOptions);
-    break;
- case "firefox":
-    FirefoxOptions firefoxOptions = new FirefoxOptions();
-    driver = new RemoteWebDriver(new URL("http://localhost:4446"),firefoxOptions);
-    break;
- case "edge":
-    EdgeOptions edgeOptions = new EdgeOptions();
-    driver = new RemoteWebDriver(new URL("http://localhost:4447"),edgeOptions);
-    break;
-````
+  ````bash
+   case "chrome":
+      ChromeOptions chromeOptions = new ChromeOptions();
+      driver = new RemoteWebDriver(new URL("http://localhost:4445"),chromeOptions);
+      break;
+   case "firefox":
+      FirefoxOptions firefoxOptions = new FirefoxOptions();
+      driver = new RemoteWebDriver(new URL("http://localhost:4446"),firefoxOptions);
+      break;
+   case "edge":
+      EdgeOptions edgeOptions = new EdgeOptions();
+      driver = new RemoteWebDriver(new URL("http://localhost:4447"),edgeOptions);
+      break;
+  ````
 Each url with respective port is set up with corresponding container.
 
 ## View test run visually on browser
@@ -183,6 +185,150 @@ To see what is happening inside the container, head to:
 - Edge container: http://localhost:7903/?autoconnect=1&resize=scale&password=secret
 
 or simply: http://localhost:7901 with password is "secret".
+
+# Set up Selenium Grid with Docker image using different machines
+The Hub and Nodes will be created on different machines/VMs, they need to know each other's IPs to communicate properly. If more than one node will be running on the same Machine/VM, they must be configured to expose different ports.
+And as I already mentioned, using different containers for hub and nodes, it is the same concept with setting up Hub and Nodes on different machines, which requires us to specify Event Bus, Publish Event port and Subscribe Event port.
+
+## Hub - Machine/VM 1
+By default, port 4444 is registered for server whereas 4442 and 4443 are exposed for Event Bus ports
+  ````bash
+  $ docker run -d -p 4442-4444:4442-4444 --name selenium-hub selenium/hub:4.7.2-20221219
+  ````
+
+## Node Chrome - Machine/VM 2
+- Default port of Node is 5555, so we simply expose that
+- Event Bus Host need to be set up with IP of Hub machine
+- Node host is current IP of this Node machine
+- Replace ` with \ if you are using Windows command line, below example is for macOS/Linux
+  ````bash
+    docker run -d -p 5555:5555 `
+      --shm-size="2g" `
+      -e SE_EVENT_BUS_HOST=<ip-from-machine-1> `
+      -e SE_EVENT_BUS_PUBLISH_PORT=4442 `
+      -e SE_EVENT_BUS_SUBSCRIBE_PORT=4443 `
+      -e SE_NODE_HOST=<ip-from-machine-2> `
+      selenium/node-chrome:4.7.2-20221219
+  ````
+
+## Node Firefox - Machine/VM 3
+Same set up applied for Firefox node machine with few modifications about node ip and image
+  ````bash
+    docker run -d -p 5555:5555 \
+      --shm-size="2g" \
+      -e SE_EVENT_BUS_HOST=<ip-from-machine-1> \
+      -e SE_EVENT_BUS_PUBLISH_PORT=4442 \
+      -e SE_EVENT_BUS_SUBSCRIBE_PORT=4443 \
+      -e SE_NODE_HOST=<ip-from-machine-3> \
+      selenium/node-firefox:4.7.2-20221219
+  ````
+
+## Node Edge - Machine/VM 4
+Same set up applied for Edge node machine with few modifications about node ip and image
+  ````bash
+    docker run -d -p 5555:5555 \
+      --shm-size="2g" \
+      -e SE_EVENT_BUS_HOST=<ip-from-machine-1> \
+      -e SE_EVENT_BUS_PUBLISH_PORT=4442 \
+      -e SE_EVENT_BUS_SUBSCRIBE_PORT=4443 \
+      -e SE_NODE_HOST=<ip-from-machine-4> \
+      selenium/node-edge:4.7.2-20221219
+  ````
+
+## Point test to exposed ip of hub
+This just works seamlessly
+````bash
+driver = new RemoteWebDriver(new URL("http://<ip-from-machine-1>:4444"),capabilities);
+````
+
+# Set up Selenium Grid with Docker compose
+
+## What is Docker compose
+Compose is a tool for defining and running multi-container Docker applications. With Compose, you use a YAML file to configure your application’s services. Then, with a single command, you create and start all the services from your configuration.
+
+## docker-compose-v3.yml
+```
+version: "3"
+services:
+  chrome:
+    image: selenium/node-chrome:4.7.2-20221219
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+
+  firefox:
+    image: selenium/node-firefox:4.7.2-20221219
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      
+  edge:
+    image: selenium/node-edge:4.7.2-20221219
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+
+  selenium-hub:
+    image: selenium/hub:4.7.2-20221219
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+```
+- To execute this docker-compose yml file use `docker-compose -f docker-compose-v3.yml up`
+- Add the `-d` flag at the end for detached execution
+- To stop the execution, hit Ctrl+C, and then `docker-compose -f docker-compose-v3.yml down`
+
+We can modify above yml to use noVNC by assign the default noVNC port of each node container (7900) to any port.
+
+For example:
+````bash
+chrome:
+    image: selenium/node-chrome:4.7.2-20221219
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    ports:
+      - "7901:7900"
+````
+Then we can inspect what runs inside browser of container by" http://localhost:7901/?autoconnect=1&resize=scale&password=secret
+
+## Point test to exposed hub port
+An example test is in /test/java/DockerComposeTest.java
+
+  ````bash
+  driver = new RemoteWebDriver(new URL("http://localhost:4444"),chromeOptions);
+  ````
+Run it with DockerCompose.xml execution file
+
+## Video recording for test execution
+Tests execution can be recorded by using the selenium/video:ffmpeg-4.3.1-20221219 Docker image. One container is needed per each container where a browser is running. This means if you are running 5 Nodes/Standalone containers, you will need 5 video containers, the mapping is 1-1.
+
+Currently, the only way to do this mapping is manually (either starting the containers manually, or through docker-compose)
+
+After the containers are stopped and removed, you should see a video file on your machine's /tmp/videos directory.
+
+Please head to docker-compose-v3-video.yml for full details.
+
+# Set up Selenium Grid with Zalenium
+
 # Author
 <h4 align="center">
 	Tuyen Nguyen - Senior QA Automation Engineer
@@ -191,15 +337,12 @@ or simply: http://localhost:7901 with password is "secret".
 	<a href="trongtuyen96@gmail.com">trongtuyen96@gmail.com</a>
 	</h5>
 <p align="center">
-	 <a alt="Github" href="https://github.com/trongtuyen96">
-    <img src="https://user-images.githubusercontent.com/25218255/47360756-794c1f00-d6fa-11e8-86fa-7b1c2e4dda92.png" width="50">
-  </a>
-		 <a alt="LinkedIn" href="https://www.linkedin.com/in/tuyennguyen96/">
-    <img src="https://user-images.githubusercontent.com/25218255/47360366-8583ac80-d6f9-11e8-8871-219802a9a162.png" width="50">
-  </a>
-		 <a alt="Facebook" href="https://www.facebook.com/ntrongtuyen96">
-    <img src="https://user-images.githubusercontent.com/25218255/47360363-84eb1600-d6f9-11e8-8029-818481536200.png" width="50">
-  </a>
+  <a href="https://github.com/trongtuyen96">
+    <img src="https://user-images.githubusercontent.com/25218255/47360756-794c1f00-d6fa-11e8-86fa-7b1c2e4dda92.png" width="50"></a>
+  <a href="https://www.linkedin.com/in/tuyennguyen96/">
+    <img src="https://user-images.githubusercontent.com/25218255/47360366-8583ac80-d6f9-11e8-8871-219802a9a162.png" width="50"></a>
+  <a href="https://www.facebook.com/ntrongtuyen96">
+    <img src="https://user-images.githubusercontent.com/25218255/47360363-84eb1600-d6f9-11e8-8029-818481536200.png" width="50"></a>
 </p>
 
 # License
