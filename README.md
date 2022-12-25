@@ -51,6 +51,9 @@ Standalone combines all Grid components seamlessly into one. Running a Grid in S
 - Start the Grid:
   ````bash
   java -jar selenium-server-<version>.jar standalone
+  
+  // We use 4.7.2
+  java -jar selenium-server-4.7.2.jar standalone
   ````
 - The server will start automatically at http://localhost:4444
 - Point RemoteWebDriver in your test to http://localhost:4444
@@ -60,6 +63,15 @@ Standalone combines all Grid components seamlessly into one. Running a Grid in S
   ````
 - Run your test
   - Example: /test/java/SeleniumGridTest.java
+
+<p align="center">
+    <img src="images/grid_standalone_run.png">
+    <em>standalone run</em>
+    <br>
+    <br>
+    <img src="images/grid_standalone.png">
+    <em>http://localhost:4444/ui</em>
+</p>
 
 ## Hub and Node mode
 Hub and Node is the most used role because it allows to:
@@ -89,6 +101,22 @@ To set up more nodes on the same machine, we can specify different ports for the
   // Node 2
   java -jar selenium-server-<version>.jar node --port 6666
   ````
+<p align="center">
+    <img src="images/grid_hub_node_run_hub.png">
+    <em>hub run</em>
+    <br>
+    <br>
+    <img src="images/grid_hub_node_run_node1.png">
+    <em>node 1 run</em>
+    <br>
+    <br>
+    <img src="images/grid_hub_node_run_node2.png">
+    <em>node 2 run</em>
+    <br>
+    <br>
+    <img src="images/grid_hub_node.png">
+    <em>http://localhost:4444/ui</em>
+</p>
 
 ### Hub and Node on different machines
 Hub and Nodes talk to each other via HTTP and the Event Bus (the Event Bus lives inside the Hub). A Node sends a message to the Hub via the Event Bus to start the registration process. When the Hub receives the message, reaches out to the Node via HTTP to confirm its existence.
@@ -132,7 +160,6 @@ There are 3 docker images for Chrome, Firefox and Edge used in this example.
 They will use port 4444 by default for server and 7900 for NoVNC, so to use all 3 without error in allocated ports, mapping new ports need to be done.
 
 ## Start Docker containers
-
 ### Start Chrome standalone with port 4445
   ````bash
   docker run -d -p 4445:4444 -p 7901:7900 --shm-size="2g" selenium/standalone-chrome:4.7.2-20221219
@@ -178,6 +205,27 @@ In my test /test/java/DockerStandaloneTest.java
   ````
 Each url with respective port is set up with corresponding container.
 
+<p align="center">
+    <img src="images/docker_standalone_run.png">
+    <em>docker run</em>
+    <br>
+    <br>
+    <img src="images/docker_standalone_containers.png">
+    <em>standalone containers</em>
+    <br>
+    <br>
+    <img src="images/docker_standalone_chrome.png">
+    <em>standalone chrome: http://localhost:4445/ui</em>
+    <br>
+    <br>
+    <img src="images/docker_standalone_firefox.png">
+    <em>standalone firefox: http://localhost:4446/ui</em>
+    <br>
+    <br>
+    <img src="images/docker_standalone_edge.png">
+    <em>standalone edge: http://localhost:4447/ui</em>
+</p>
+
 ## View test run visually on browser
 New version of standalone container from selenium has provided noVNC to allow user to inspect what is running in browser.
 We do not need to install VNC client to do this anymore.
@@ -188,6 +236,19 @@ To see what is happening inside the container, head to:
 - Edge container: http://localhost:7903/?autoconnect=1&resize=scale&password=secret
 
 or simply: http://localhost:7901 with password is "secret".
+<p align="center">
+    <img src="images/docker_standalone_view.png">
+    <em>view tests run</em>
+    <br>
+    <img src="images/docker_standalone_chrome_view.png">
+    <em>chrome: http://localhost:7901</em>
+</p>
+
+or clicking on video icon next to session id under Sessions tab.
+<p align="center">
+    <img src="images/docker_standalone_video_button.png">
+    <em>click video button to view</em>
+</p>
 
 # Set up Selenium Grid with Docker image using different machines
 The Hub and Nodes will be created on different machines/VMs, they need to know each other's IPs to communicate properly. If more than one node will be running on the same Machine/VM, they must be configured to expose different ports.
@@ -203,38 +264,38 @@ By default, port 4444 is registered for server whereas 4442 and 4443 are exposed
 - Default port of Node is 5555, so we simply expose that
 - Event Bus Host need to be set up with IP of Hub machine
 - Node host is current IP of this Node machine
-- Replace ` with \ if you are using Windows command line, below example is for macOS/Linux
+- Replace ^ with ` if you are using Linux/macOS/PowerShell, below example is for Windows CMD
   ````bash
-    docker run -d -p 5555:5555 `
-      --shm-size="2g" `
-      -e SE_EVENT_BUS_HOST=<ip-from-machine-1> `
-      -e SE_EVENT_BUS_PUBLISH_PORT=4442 `
-      -e SE_EVENT_BUS_SUBSCRIBE_PORT=4443 `
-      -e SE_NODE_HOST=<ip-from-machine-2> `
+    docker run -d -p 5555:5555 ^
+      --shm-size="2g" ^
+      -e SE_EVENT_BUS_HOST=<ip-from-machine-1> ^
+      -e SE_EVENT_BUS_PUBLISH_PORT=4442 ^
+      -e SE_EVENT_BUS_SUBSCRIBE_PORT=4443 ^
+      -e SE_NODE_HOST=<ip-from-machine-2> ^
       selenium/node-chrome:4.7.2-20221219
   ````
 
 ## Node Firefox - Machine/VM 3
 Same set up applied for Firefox node machine with few modifications about node ip and image
   ````bash
-    docker run -d -p 5555:5555 \
-      --shm-size="2g" \
-      -e SE_EVENT_BUS_HOST=<ip-from-machine-1> \
-      -e SE_EVENT_BUS_PUBLISH_PORT=4442 \
-      -e SE_EVENT_BUS_SUBSCRIBE_PORT=4443 \
-      -e SE_NODE_HOST=<ip-from-machine-3> \
+    docker run -d -p 5555:5555 ^
+      --shm-size="2g" ^
+      -e SE_EVENT_BUS_HOST=<ip-from-machine-1> ^
+      -e SE_EVENT_BUS_PUBLISH_PORT=4442 ^
+      -e SE_EVENT_BUS_SUBSCRIBE_PORT=4443 ^
+      -e SE_NODE_HOST=<ip-from-machine-3> ^
       selenium/node-firefox:4.7.2-20221219
   ````
 
 ## Node Edge - Machine/VM 4
 Same set up applied for Edge node machine with few modifications about node ip and image
   ````bash
-    docker run -d -p 5555:5555 \
-      --shm-size="2g" \
-      -e SE_EVENT_BUS_HOST=<ip-from-machine-1> \
-      -e SE_EVENT_BUS_PUBLISH_PORT=4442 \
-      -e SE_EVENT_BUS_SUBSCRIBE_PORT=4443 \
-      -e SE_NODE_HOST=<ip-from-machine-4> \
+    docker run -d -p 5555:5555 ^
+      --shm-size="2g" ^
+      -e SE_EVENT_BUS_HOST=<ip-from-machine-1> ^
+      -e SE_EVENT_BUS_PUBLISH_PORT=4442 ^
+      -e SE_EVENT_BUS_SUBSCRIBE_PORT=4443 ^
+      -e SE_NODE_HOST=<ip-from-machine-4> ^
       selenium/node-edge:4.7.2-20221219
   ````
 
@@ -291,10 +352,18 @@ Compose is a tool for defining and running multi-container Docker applications. 
         - "4443:4443"
         - "4444:4444"
   ```
-- To execute this docker-compose yml file use `docker-compose -f docker-compose-v3.yml up`
+- To execute this docker-compose yml file use 
+  ````bash
+  docker-compose -f docker-compose-v3.yml up
+  ````
 - Add the `-d` flag at the end for detached execution
-- To stop the execution, hit Ctrl+C, and then `docker-compose -f docker-compose-v3.yml down`
-
+  ````bash
+  docker-compose -f docker-compose-v3.yml up -d
+  ````
+- To stop the execution, hit Ctrl+C, and then
+  ````bash
+  docker-compose -f docker-compose-v3.yml down
+  ````
 We can modify above yml to use noVNC by assign the default noVNC port of each node container (7900) to any port.
 
 For example:
@@ -313,7 +382,9 @@ For example:
   ````
 Then we can inspect what runs inside browser of container by" http://localhost:7901/?autoconnect=1&resize=scale&password=secret
 
-Or we can see that easily by clicking on video icon beside browser session.
+Or we can see that easily by clicking on video icon under Sessions tab.
+
+Go to "View test run visually on browser" for more details.
 
 ## Point test to exposed hub port
 An example test is in /test/java/DockerComposeTest.java
@@ -321,6 +392,19 @@ An example test is in /test/java/DockerComposeTest.java
   driver = new RemoteWebDriver(new URL("http://localhost:4444"),chromeOptions);
   ````
 Run it with DockerCompose.xml execution file
+
+<p align="center">
+    <img src="images/docker_compose_run.png">
+    <em>compose run</em>
+    <br>
+    <br>
+    <img src="images/docker_compose_containers.png">
+    <em>compose containers</em>
+    <br>
+    <br>
+    <img src="images/docker_compose.png">
+    <em>http://localhost:4444/ui</em>
+</p>
 
 ## Video recording for test execution
 Tests execution can be recorded by using the selenium/video:ffmpeg-4.3.1-20221219 Docker image. One container is needed per each container where a browser is running. This means if you are running 5 Nodes/Standalone containers, you will need 5 video containers, the mapping is 1-1.
@@ -341,23 +425,30 @@ But it still has its own great features including (Grid 4 has them as well):
 - The recorded video of the Selenium tests helps in the review and debug process.
 - Zalenium Grid on the cloud comes with basic authentication, thereby providing basic security when accessing the Grid.
 
-So if you find this is still good for your need, here is how you can set it up.
+So if you find this is still good for your needs, here is how you can set it up.
 
 ## Start the image
 Zalenium uses docker to scale on-demand, therefore we need to give it the docker.sock full access, this is known as "Docker alongside docker".
+
+To explicitly pulling elgalu/selenium images without separate command, we can use "-e PULL_SELENIUM_IMAGE=true"
+
+Replace ^ with ` if you are using Linux/macOS/PowerShell, below example is for Windows CMD
+
   ````bash
-  docker run --rm -ti --name zalenium -p 4444:4444 \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v /tmp/videos:/home/seluser/videos \
+  docker run --rm -ti --name zalenium -p 4444:4444 ^
+    -e PULL_SELENIUM_IMAGE=true ^
+    -v /var/run/docker.sock:/var/run/docker.sock ^
+    -v /tmp/videos:/home/seluser/videos ^
     --privileged dosel/zalenium start
   ````
 Run Zalenium as --privileged is suggested to speed up the node registration process by increasing the entropy level. This is optional since it is just meant to improve its performance.
 
 By default, our Selenium grid will have 1 Chrome and 1 Firefox container. If you need more, say 3 chrome containers, 2 firefox then use below arguments.
   ````bash
-  docker run --rm -ti --name zalenium -p 4444:4444 \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v /tmp/videos:/home/seluser/videos \
+  docker run --rm -ti --name zalenium -p 4444:4444 ^
+    -e PULL_SELENIUM_IMAGE=true ^
+    -v /var/run/docker.sock:/var/run/docker.sock ^
+    -v /tmp/videos:/home/seluser/videos ^
     --privileged dosel/zalenium start --chromeContainers 3 --firefoxContainers 2
   ````
 
