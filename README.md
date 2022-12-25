@@ -1,6 +1,6 @@
 <h1 align="center">
-  <a href="background"><img src="Background_with_title.PNG" alt="background"></a>
-  <a href="cover"><img src="cover.png" alt="cover" width="734px"></a>
+  <a href="background"><img src="images/Background_with_title.PNG" alt="background"></a>
+  <a href="cover"><img src="images/cover.png" alt="cover" width="734px"></a>
 </h1>
 
 <h3 align="center" style="bold">A series of instruction about setting up selenium grid, docker and zalenium with TestNG framework.</h3>
