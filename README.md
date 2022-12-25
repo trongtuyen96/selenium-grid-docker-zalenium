@@ -36,6 +36,9 @@ When it comes to Selenium automation testing, it is important that a test run in
 - Lesser chances of discrepancies
 
 ## Zalenium
+Zalenium is a flexible and scalable container based Selenium Grid, with video recording, live preview, basic auth & a dashboard. Moreover, it has out-of-the-box Docker and Kubernetes integration. This fact makes Zalenium an attractive choice to get Selenium based infrastructure up and running.
+
+Zalenium provides docker images (Hub + Nodes) with the latest browser drivers, browsers, and tools (for any language bindings) required for Selenium automation. The containers created from these images can be scaled-up with simple CLI commands.
 
 # Set up Selenium Grid
 ## Prerequisites
@@ -237,9 +240,9 @@ Same set up applied for Edge node machine with few modifications about node ip a
 
 ## Point test to exposed ip of hub
 This just works seamlessly
-````bash
-driver = new RemoteWebDriver(new URL("http://<ip-from-machine-1>:4444"),capabilities);
-````
+  ````bash
+  driver = new RemoteWebDriver(new URL("http://<ip-from-machine-1>:4444"),capabilities);
+  ````
 
 # Set up Selenium Grid with Docker compose
 
@@ -247,47 +250,47 @@ driver = new RemoteWebDriver(new URL("http://<ip-from-machine-1>:4444"),capabili
 Compose is a tool for defining and running multi-container Docker applications. With Compose, you use a YAML file to configure your application’s services. Then, with a single command, you create and start all the services from your configuration.
 
 ## docker-compose-v3.yml
-```
-version: "3"
-services:
-  chrome:
-    image: selenium/node-chrome:4.7.2-20221219
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-
-  firefox:
-    image: selenium/node-firefox:4.7.2-20221219
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-      
-  edge:
-    image: selenium/node-edge:4.7.2-20221219
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-
-  selenium-hub:
-    image: selenium/hub:4.7.2-20221219
-    container_name: selenium-hub
-    ports:
-      - "4442:4442"
-      - "4443:4443"
-      - "4444:4444"
-```
+  ```
+  version: "3"
+  services:
+    chrome:
+      image: selenium/node-chrome:4.7.2-20221219
+      shm_size: 2gb
+      depends_on:
+        - selenium-hub
+      environment:
+        - SE_EVENT_BUS_HOST=selenium-hub
+        - SE_EVENT_BUS_PUBLISH_PORT=4442
+        - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+  
+    firefox:
+      image: selenium/node-firefox:4.7.2-20221219
+      shm_size: 2gb
+      depends_on:
+        - selenium-hub
+      environment:
+        - SE_EVENT_BUS_HOST=selenium-hub
+        - SE_EVENT_BUS_PUBLISH_PORT=4442
+        - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+        
+    edge:
+      image: selenium/node-edge:4.7.2-20221219
+      shm_size: 2gb
+      depends_on:
+        - selenium-hub
+      environment:
+        - SE_EVENT_BUS_HOST=selenium-hub
+        - SE_EVENT_BUS_PUBLISH_PORT=4442
+        - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+  
+    selenium-hub:
+      image: selenium/hub:4.7.2-20221219
+      container_name: selenium-hub
+      ports:
+        - "4442:4442"
+        - "4443:4443"
+        - "4444:4444"
+  ```
 - To execute this docker-compose yml file use `docker-compose -f docker-compose-v3.yml up`
 - Add the `-d` flag at the end for detached execution
 - To stop the execution, hit Ctrl+C, and then `docker-compose -f docker-compose-v3.yml down`
@@ -295,24 +298,25 @@ services:
 We can modify above yml to use noVNC by assign the default noVNC port of each node container (7900) to any port.
 
 For example:
-````bash
-chrome:
-    image: selenium/node-chrome:4.7.2-20221219
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-    ports:
-      - "7901:7900"
-````
+  ````bash
+  chrome:
+      image: selenium/node-chrome:4.7.2-20221219
+      shm_size: 2gb
+      depends_on:
+        - selenium-hub
+      environment:
+        - SE_EVENT_BUS_HOST=selenium-hub
+        - SE_EVENT_BUS_PUBLISH_PORT=4442
+        - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      ports:
+        - "7901:7900"
+  ````
 Then we can inspect what runs inside browser of container by" http://localhost:7901/?autoconnect=1&resize=scale&password=secret
+
+Or we can see that easily by clicking on video icon beside browser session.
 
 ## Point test to exposed hub port
 An example test is in /test/java/DockerComposeTest.java
-
   ````bash
   driver = new RemoteWebDriver(new URL("http://localhost:4444"),chromeOptions);
   ````
@@ -328,6 +332,48 @@ After the containers are stopped and removed, you should see a video file on you
 Please head to docker-compose-v3-video.yml for full details.
 
 # Set up Selenium Grid with Zalenium
+Zalenium is not being developed anymore, so it has been stick to Grid 3.x which not inherited the best features from Grid 4.
+
+But it still has its own great features including (Grid 4 has them as well):
+- An intuitive dashboard for analyzing the logs of the Selenium script execution.
+- Live previews of the Selenium script execution on Selenium Grid.
+- Custom capabilities for running cross-browser tests and responsive tests on preferred screen resolutions and time-zones.
+- The recorded video of the Selenium tests helps in the review and debug process.
+- Zalenium Grid on the cloud comes with basic authentication, thereby providing basic security when accessing the Grid.
+
+So if you find this is still good for your need, here is how you can set it up.
+
+## Start the image
+Zalenium uses docker to scale on-demand, therefore we need to give it the docker.sock full access, this is known as "Docker alongside docker".
+  ````bash
+  docker run --rm -ti --name zalenium -p 4444:4444 \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /tmp/videos:/home/seluser/videos \
+    --privileged dosel/zalenium start
+  ````
+Run Zalenium as --privileged is suggested to speed up the node registration process by increasing the entropy level. This is optional since it is just meant to improve its performance.
+
+By default, our Selenium grid will have 1 Chrome and 1 Firefox container. If you need more, say 3 chrome containers, 2 firefox then use below arguments.
+  ````bash
+  docker run --rm -ti --name zalenium -p 4444:4444 \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /tmp/videos:/home/seluser/videos \
+    --privileged dosel/zalenium start --chromeContainers 3 --firefoxContainers 2
+  ````
+
+## Point your test
+Point the test to http://localhost:4444/wd/hub
+
+And we can access below:
+- Grid console: http://localhost:4444/grid/console
+- Zalenium Live Preview: http://localhost:4444/grid/admin/live
+- Dashboard: http://localhost:4444/dashboard/ after running your first test
+
+To stop: 
+  ````bash
+  docker stop zalenium
+  ````
+For more usage, go here: https://opensource.zalando.com/zalenium/#usage
 
 # Author
 <h4 align="center">
