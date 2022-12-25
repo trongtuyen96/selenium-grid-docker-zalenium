@@ -1,6 +1,6 @@
 <h1 align="center">
-  <a href="background"><img src="https://github.com/trongtuyen96/automationTestExample/blob/master/Background_with_title.PNG" alt="background"></a>
-  <a href="cover"><img src="https://github.com/trongtuyen96/testng-allure-extent-framework/blob/22b017133819447cdbd6a18e5ec0be0730e2e82c/cover.png" alt="cover" width="734px"></a>
+  <a href="background"><img src="Background_with_title.PNG" alt="background"></a>
+  <a href="cover"><img src="cover.png" alt="cover" width="734px"></a>
 </h1>
 
 <h3 align="center" style="bold">A series of instruction about setting up selenium grid, docker and zalenium with TestNG framework.</h3>
