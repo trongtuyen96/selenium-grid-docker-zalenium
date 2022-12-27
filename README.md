@@ -63,6 +63,7 @@ Standalone combines all Grid components seamlessly into one. Running a Grid in S
   ````
 - Run your test
   - Example: /test/java/SeleniumGridTest.java
+  - Execution file: SeleniumGrid.xml
 
 <p align="center">
     <img src="images/grid_standalone_run.png">
@@ -117,6 +118,22 @@ To set up more nodes on the same machine, we can specify different ports for the
     <img src="images/grid_hub_node.png">
     <em>http://localhost:4444/ui</em>
 </p>
+
+### Point the test
+- Point RemoteWebDriver in your test to http://localhost:4444
+  ````bash
+  case "chrome":
+      ChromeOptions chromeOptions = new ChromeOptions();
+      driver = new RemoteWebDriver(new URL("http://localhost:4444"),chromeOptions);
+      break;
+  case "firefox":
+      FirefoxOptions firefoxOptions = new FirefoxOptions();
+      driver = new RemoteWebDriver(new URL("http://localhost:4444"),firefoxOptions);
+      break;
+  ````
+- Run your test
+  - Example: /test/java/HubNodeTest.java
+  - Execution file: HubNode.xml
 
 ### Hub and Node on different machines
 Hub and Nodes talk to each other via HTTP and the Event Bus (the Event Bus lives inside the Hub). A Node sends a message to the Hub via the Event Bus to start the registration process. When the Hub receives the message, reaches out to the Node via HTTP to confirm its existence.
