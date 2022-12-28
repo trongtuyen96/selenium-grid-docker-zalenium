@@ -8,8 +8,8 @@
 # Table of Contents
 - [Getting Started](#getting-started)
 - [Set up Selenium Grid](#set-up-selenium-grid)
-- [Set up Selenium Grid with standalone Docker image](#set-up-selenium-grid-with-standalone-docker-image)
-- [Set up Selenium Grid with Docker image using different machines](#set-up-selenium-grid-with-docker-image-using-different-machines)
+- [Set up Selenium Grid with Docker in Standalone mode](#set-up-selenium-grid-with-docker-in-standalone-mode)
+- [Set up Selenium Grid with Docker using different machines](#set-up-selenium-grid-with-docker-using-different-machines)
 - [Set up Selenium Grid with Docker compose](#set-up-selenium-grid-with-docker-compose)
 - [Set up Selenium Grid with Zalenium](#set-up-selenium-grid-with-zalenium)
 - [Author](#author)
@@ -171,7 +171,7 @@ The detailed instructions will be added later.
 - Middle: Hub/Node between 6 and 60 Nodes.
 - Large: Hub/Node between 60 and 100 Nodes. Distributed with over 100 Nodes.
 
-# Set up Selenium Grid with standalone Docker image
+# Set up Selenium Grid with Docker in Standalone mode
 There are 3 docker images for Chrome, Firefox and Edge used in this example.
 
 They will use port 4444 by default for server and 7900 for NoVNC, so to use all 3 without error in allocated ports, mapping new ports need to be done.
@@ -267,7 +267,7 @@ or clicking on video icon next to session id under Sessions tab.
     <em>click video button to view</em>
 </p>
 
-# Set up Selenium Grid with Docker image using different machines
+# Set up Selenium Grid with Docker using different machines
 The Hub and Nodes will be created on different machines/VMs, they need to know each other's IPs to communicate properly. If more than one node will be running on the same Machine/VM, they must be configured to expose different ports.
 And as I already mentioned, using different containers for hub and nodes, it is the same concept with setting up Hub and Nodes on different machines, which requires us to specify Event Bus, Publish Event port and Subscribe Event port.
 
