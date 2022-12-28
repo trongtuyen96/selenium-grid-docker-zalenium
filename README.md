@@ -274,7 +274,7 @@ And as I already mentioned, using different containers for hub and nodes, it is 
 ## Hub - Machine/VM 1
 By default, port 4444 is registered for server whereas 4442 and 4443 are exposed for Event Bus ports
   ````bash
-  $ docker run -d -p 4442-4444:4442-4444 --name selenium-hub selenium/hub:4.7.2-20221219
+  docker run -d -p 4442-4444:4442-4444 --name selenium-hub selenium/hub:4.7.2-20221219
   ````
 
 ## Node Chrome - Machine/VM 2
